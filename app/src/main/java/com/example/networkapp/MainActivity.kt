@@ -13,7 +13,11 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
+import org.json.JSONArray
 import org.json.JSONObject
+import java.io.*
+import java.lang.Exception
+import java.lang.StringBuilder
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +29,13 @@ class MainActivity : AppCompatActivity() {
     lateinit var showButton: Button
     lateinit var comicImageView: ImageView
 
+    // file name
+    private val internalFilename = "my_file"
+
+    // pointer to file in storage
+    private lateinit var file: File
+
+    //*
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -41,13 +52,48 @@ class MainActivity : AppCompatActivity() {
             downloadComic(numberEditText.text.toString())
         }
 
+        // Create file reference(to internal storage) for app-specific file
+        file = File(filesDir, internalFilename)
+
+        // Load string data and pass in String data as JSONObject into showComic function
+        if (file.exists()) {
+            try {
+                val br = BufferedReader(FileReader(file))
+                val text = StringBuilder()
+                var line: String?
+                while (br.readLine().also { line = it } != null) {
+                    text.append(line)
+                    text.append('\n')
+                }
+                br.close()
+                showComic(JSONObject(text.toString()))
+
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+
     }
 
+    //*
     private fun downloadComic (comicId: String) {
         val url = "https://xkcd.com/$comicId/info.0.json"
         requestQueue.add (
-            JsonObjectRequest(url, {showComic(it)}, {
+            JsonObjectRequest(url, {showComic(it)
+                try {
+                    // save the JSONObject that represents the comic into the file we created
+                    val outputStream = FileOutputStream(file)
+                    outputStream.write(it.toString().toByteArray())
+                    outputStream.close()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                                   }
+
+                , {
+
             })
+
         )
     }
 
@@ -55,6 +101,13 @@ class MainActivity : AppCompatActivity() {
         titleTextView.text = comicObject.getString("title")
         descriptionTextView.text = comicObject.getString("alt")
         Picasso.get().load(comicObject.getString("img")).into(comicImageView)
+    }
+
+    override fun onStop(){
+        super.onStop()
+
+        //file.delete()
+
     }
 
 
