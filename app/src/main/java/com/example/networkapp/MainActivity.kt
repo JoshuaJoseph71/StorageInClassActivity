@@ -1,7 +1,11 @@
 package com.example.networkapp
 
+import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -50,6 +54,24 @@ class MainActivity : AppCompatActivity() {
 
         showButton.setOnClickListener {
             downloadComic(numberEditText.text.toString())
+        }
+        if(true){
+            //loadComic()
+        }
+
+        if (intent?.action == Intent.ACTION_VIEW){
+            intent.data?.path?.run{
+                //Log.d("Comic number", split("/")[1])
+                downloadComic(split("/")[1])
+
+            }
+        }
+
+        findViewById<Button>(R.id.button).setOnClickListener(){
+            val intent = Intent(
+                Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                Uri.parse("package:${packageName}"))
+            startActivity(intent)
         }
 
         // Create file reference(to internal storage) for app-specific file
