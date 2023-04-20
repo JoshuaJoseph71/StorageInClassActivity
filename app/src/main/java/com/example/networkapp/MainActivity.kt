@@ -68,10 +68,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.button).setOnClickListener(){
-            val intent = Intent(
-                Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
-                Uri.parse("package:${packageName}"))
-            startActivity(intent)
+            try {
+                val intent = Intent(
+                    Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                    Uri.parse("package:${packageName}")
+                )
+                startActivity(intent)
+            } catch (e:Exception){
+
+            }
         }
 
         // Create file reference(to internal storage) for app-specific file
